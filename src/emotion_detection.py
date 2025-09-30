@@ -45,23 +45,29 @@ val_loader = DataLoader(val_dataset, batch_size=32)
 # 4. Define model and training loop
 # -----------------------------
 class EmotionNet(nn.Module):
-    def __init__(self, input_dim, hidden_dim, num_classes):
+    def __init__(self, input_dim, hidden_dim1, hidden_dim2, num_classes):
         super(EmotionNet, self).__init__()
-        self.fc1 = nn.Linear(input_dim, hidden_dim)
-        self.relu = nn.ReLU()
-        self.fc2 = nn.Linear(hidden_dim, num_classes)
+        self.fc1 = nn.Linear(input_dim, hidden_dim1)
+        self.relu1 = nn.ReLU()
+        self.fc2 = nn.Linear(hidden_dim1, hidden_dim2)
+        self.relu2 = nn.ReLU()
+        self.dropout1 = nn.Dropout(0.5)
+        self.fc3 = nn.Linear(hidden_dim2, num_classes)
 
     def forward(self, x):
         x = self.fc1(x)
-        x = self.relu(x)
+        x = self.relu1(x)
+        x = self.dropout1(x)
         x = self.fc2(x)
+        x = self.relu2(x)
+        x = self.fc3(x)
         return x
 
-def train_model(train_loader, val_loader, input_dim, num_classes, epochs=20, lr=0.001):
+def train_model(train_loader, val_loader, input_dim, num_classes, epochs=600, lr=0.001):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print("Using device:", device)
 
-    model = EmotionNet(input_dim=input_dim, hidden_dim=128, num_classes=num_classes).to(device)
+    model = EmotionNet(input_dim=input_dim, hidden_dim1=128, hidden_dim2 = 128, num_classes=num_classes).to(device)
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adam(model.parameters(), lr=lr)
 
