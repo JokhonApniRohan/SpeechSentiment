@@ -4,6 +4,9 @@ import torch.nn as nn
 import torch.optim as optim
 from dataset_builder import build_dataset
 from torch.utils.data import Dataset, DataLoader, random_split
+import matplotlib.pyplot as plt
+import json
+
 
 # -----------------------------
 # 1. Build dataset
@@ -18,8 +21,8 @@ features, labels = build_dataset("data")  # adjust path to your data folder
 class AudioDataset(Dataset):
     def __init__(self, features, labels):
         # Map emotion strings to integers
-        emotion_to_idx = {emotion: i for i, emotion in enumerate(sorted(set(labels)))}
-        labels_idx = [emotion_to_idx[label] for label in labels]
+        self.emotion_to_idx = {emotion: i for i, emotion in enumerate(sorted(set(labels)))}
+        labels_idx = [self.emotion_to_idx[label] for label in labels]
         self.features = torch.tensor(features, dtype=torch.float32)
         self.labels = torch.tensor(labels_idx, dtype=torch.long)
 
@@ -57,9 +60,9 @@ class EmotionNet(nn.Module):
     def forward(self, x):
         x = self.fc1(x)
         x = self.relu1(x)
-        x = self.dropout1(x)
         x = self.fc2(x)
         x = self.relu2(x)
+        x = self.dropout1(x)
         x = self.fc3(x)
         return x
 
@@ -70,6 +73,8 @@ def train_model(train_loader, val_loader, input_dim, num_classes, epochs=600, lr
     model = EmotionNet(input_dim=input_dim, hidden_dim1=128, hidden_dim2 = 128, num_classes=num_classes).to(device)
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adam(model.parameters(), lr=lr)
+    train_acc_lst = []
+    val_acc_lst = []
 
     for epoch in range(epochs):
         model.train()
@@ -90,6 +95,7 @@ def train_model(train_loader, val_loader, input_dim, num_classes, epochs=600, lr
             total += labels_batch.size(0)
 
         train_acc = 100 * correct / total
+        train_acc_lst.append(train_acc)
         print(f"Epoch [{epoch+1}/{epochs}], Loss: {total_loss/len(train_loader):.4f}, Acc: {train_acc:.2f}%")
 
         # Validation
@@ -104,10 +110,27 @@ def train_model(train_loader, val_loader, input_dim, num_classes, epochs=600, lr
                 val_total += labels_batch.size(0)
 
         val_acc = 100 * val_correct / val_total
+        val_acc_lst.append(val_acc)
         print(f"Validation Accuracy: {val_acc:.2f}%")
 
     torch.save(model.state_dict(), "emotion_model.pth")
     print("Model saved as emotion_model.pth")
+    emotions = sorted(set(labels))
+    emotion_to_idx = {emotion: i for i, emotion in enumerate(emotions)}
+
+    with open('labels.json', 'w') as f:
+        json.dump(emotion_to_idx, f)
+    print('Labels saved as json in labels.json')
+
+
+    # # Plot accuracies
+    # plt.plot(train_acc_lst, label="Train Accuracy")
+    # plt.plot(val_acc_lst, label="Validation Accuracy")
+    # plt.xlabel("Epochs")
+    # plt.ylabel("Accuracy (%)")
+    # plt.legend()
+    # plt.title("Training vs Validation Accuracy")
+    # plt.show()
 
 # -----------------------------
 # 5. Train
