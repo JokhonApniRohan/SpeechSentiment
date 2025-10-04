@@ -25,7 +25,7 @@ def extract_features(file_path):
     return mfcc_scaled
 
 # --- Test with your audio file ---
-file_path = "angrytest.wav"  # replace with your file
+file_path = "happytest.wav"  # replace with your file
 features = extract_features(file_path)
 features_tensor = torch.tensor(features, dtype=torch.float32).unsqueeze(0)
 

@@ -164,14 +164,14 @@ def train_model(train_loader, val_loader, input_dim, num_classes, epochs=600, lr
     print('Labels saved as json in labels.json')
 
 
-    # # Plot accuracies
-    # plt.plot(train_acc_lst, label="Train Accuracy")
-    # plt.plot(val_acc_lst, label="Validation Accuracy")
-    # plt.xlabel("Epochs")
-    # plt.ylabel("Accuracy (%)")
-    # plt.legend()
-    # plt.title("Training vs Validation Accuracy")
-    # plt.show()
+    # Plot accuracies
+    plt.plot(train_acc_lst, label="Train Accuracy")
+    plt.plot(val_acc_lst, label="Validation Accuracy")
+    plt.xlabel("Epochs")
+    plt.ylabel("Accuracy (%)")
+    plt.legend()
+    plt.title("Training vs Validation Accuracy")
+    plt.show()
 
 # -----------------------------
 # 5. Train
