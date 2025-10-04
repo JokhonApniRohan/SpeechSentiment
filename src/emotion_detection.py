@@ -6,6 +6,7 @@ from dataset_builder import build_dataset
 from torch.utils.data import Dataset, DataLoader, random_split
 import matplotlib.pyplot as plt
 import json
+import numpy as np
 
 
 # -----------------------------
@@ -14,6 +15,19 @@ import json
 features, labels = build_dataset("data")  # adjust path to your data folder
 # print("Features shape:", features.shape)
 # print("Labels shape:", labels.shape)
+
+target_emotion = 'neutral'
+
+features = np.array(features)
+labels = np.array(labels)
+
+targets = np.where(labels == target_emotion)[0]
+dup_count = 3
+features_to_add = features[targets]
+labels_to_add = labels[targets]
+
+features = np.concatenate([features] + [features_to_add] * (dup_count-1), axis = 0)
+labels = np.concatenate([labels] + [labels_to_add] * (dup_count - 1), axis=0)
 
 # -----------------------------
 # 2. PyTorch Dataset
@@ -33,6 +47,33 @@ class AudioDataset(Dataset):
         return self.features[idx], self.labels[idx]
 
 dataset = AudioDataset(features, labels)
+
+
+
+def balanced_batch(dataset, samples_per_class=180):
+    """
+    Returns a balanced subset of the dataset with exactly
+    `samples_per_class` items for each class.
+    """
+    labels = [dataset[i][1].item() for i in range(len(dataset))]
+
+    class_indices = {}
+    for idx, label in enumerate(labels):
+        class_indices.setdefault(label, []).append(idx)
+
+    selected_indices = []
+    for label, indices in class_indices.items():
+        if len(indices) >= samples_per_class:
+            selected_indices.extend(random.sample(indices, samples_per_class))
+        else:
+            # If not enough samples, sample with replacement
+            selected_indices.extend(random.choices(indices, k=samples_per_class))
+
+    random.shuffle(selected_indices)
+    return torch.utils.data.Subset(dataset, selected_indices)
+
+
+
 
 # -----------------------------
 # 3. Split and create DataLoaders
@@ -135,4 +176,5 @@ def train_model(train_loader, val_loader, input_dim, num_classes, epochs=600, lr
 # -----------------------------
 # 5. Train
 # -----------------------------
-train_model(train_loader, val_loader, input_dim=features.shape[1], num_classes=len(set(labels)))
+if __name__ == '__main__':  
+    train_model(train_loader, val_loader, input_dim=features.shape[1], num_classes=len(set(labels)))
