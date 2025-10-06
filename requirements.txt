@@ -1,1 +1,6 @@
 opensmile
+sklearn
+pandas
+numpy
+torch
+seaborn
