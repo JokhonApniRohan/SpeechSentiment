@@ -1,13 +1,15 @@
-import librosa
-import numpy as np
+import opensmile
+import pandas as pd
 
-def preprocess_audio(path):
-    y, sr = librosa.load(path, sr=16000, mono=True)
-    return y, sr
+smile = opensmile.Smile(
+    feature_set=opensmile.FeatureSet.eGeMAPSv02,
+    feature_level=opensmile.FeatureLevel.Functionals,
+)
 
-def extract_mfcc(path, n_mfcc=40):
-    """Extract MFCC features from an audio file."""
-    y, sr = preprocess_audio(path)
-    mfccs = librosa.feature.mfcc(y=y, sr=sr, n_mfcc=n_mfcc)
-    mfccs_mean = np.mean(mfccs.T, axis=0)
-    return mfccs_mean
+def extract_egemaps(path):
+    try:
+        features = smile.process_file(path)
+        return features
+    except Exception as e:
+        print(f"Error processing {path}: {e}")
+        return pd.DataFrame()

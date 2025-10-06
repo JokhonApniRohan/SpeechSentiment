@@ -1,7 +1,8 @@
 # dataset_builder.py
 import os
 import numpy as np
-from audio_processing import extract_mfcc
+import pandas as pd
+from audio_processing import extract_egemaps  # must return a DataFrame (eGeMAPS features)
 
 # Emotion mapping (RAVDESS)
 EMOTION_MAP = {
@@ -15,48 +16,26 @@ EMOTION_MAP = {
     "08": "surprised",
 }
 
-# Intensity mapping (RAVDESS: 01 = normal, 02 = strong)
-INTENSITY_MAP = {
-    "01": "normal",
-    "02": "strong",
-}
-
+INTENSITY_MAP = {"01": "normal", "02": "strong"}
 
 def parse_ravdess_filename(filename):
-    """
-    RAVDESS filename format:
-    '03-01-05-02-02-01-12.wav'
-      |  |  |  |  |  |  |
-      |  |  |  |  |  |  └── Actor ID (odd = male, even = female)
-      |  |  |  |  |  └──── Repetition
-      |  |  |  |  └────── Statement
-      |  |  |  └──────── Intensity (01 = normal, 02 = strong)
-      |  |  └────────── Emotion
-      |  └──────────── Vocal Channel
-      └─────────────── Modality (speech/song)
-    """
     parts = filename.split(".")[0].split("-")
     emotion_id = parts[2]
     intensity_id = parts[3]
     actor_id = int(parts[-1])
-
     emotion = EMOTION_MAP.get(emotion_id, "unknown")
     intensity = INTENSITY_MAP.get(intensity_id, "unknown")
     gender = "male" if actor_id % 2 != 0 else "female"
-
     return emotion, intensity, gender
 
 
-def build_dataset(data_dir="data"):
-    features = []
-    emotion_labels = []
-    intensity_labels = []
-    gender_labels = []
+def build_dataset(data_dir="data", output_csv="ravdess_features.csv"):
+    all_data = []
 
-    # Create mapping for intensity and gender
     intensity_to_idx = {"normal": 0, "strong": 1}
     gender_to_idx = {"male": 0, "female": 1}
 
+    file_count = 0
     for root, _, files in os.walk(data_dir):
         for file in files:
             if not file.endswith(".wav"):
@@ -68,22 +47,51 @@ def build_dataset(data_dir="data"):
             if emotion == "unknown":
                 continue
 
-            mfcc_features = extract_mfcc(file_path)
+            # Extract features for this file
+            features = extract_egemaps(file_path)
+            if features is None or features.empty:
+                print(f"⚠️ Skipped (no features): {file}")
+                continue
 
-            features.append(mfcc_features)
-            emotion_labels.append(emotion)
-            intensity_labels.append(intensity_to_idx[intensity])
-            gender_labels.append(gender_to_idx[gender])
+            feature_dict = features.iloc[0].to_dict()
+            feature_dict["file"] = file
+            feature_dict["emotion"] = emotion
+            feature_dict["intensity"] = intensity_to_idx[intensity]
+            feature_dict["gender"] = gender_to_idx[gender]
 
-    # Convert emotion strings to integers
-    emotions = sorted(set(emotion_labels))
+            all_data.append(feature_dict)
+            file_count += 1
+            if file_count % 10 == 0:
+                print(f"✅ Processed {file_count} files...")
+
+    if not all_data:
+        print("❌ No features extracted! Check your data path or feature extraction.")
+        return None
+
+    # Create DataFrame
+    df = pd.DataFrame(all_data)
+    df.to_csv(output_csv, index=False)
+    print(f"\n✅ Dataset saved as '{output_csv}' with shape {df.shape}")
+
+    # Prepare NumPy arrays
+    feature_cols = [col for col in df.columns if col not in ["file", "emotion", "intensity", "gender"]]
+    features = df[feature_cols].to_numpy(dtype=np.float32)
+
+    emotions = sorted(df["emotion"].unique())
     emotion_to_idx = {emotion: i for i, emotion in enumerate(emotions)}
-    emotion_labels_idx = [emotion_to_idx[e] for e in emotion_labels]
+    emotion_labels = df["emotion"].map(emotion_to_idx).to_numpy(dtype=np.int64)
 
-    return (
-        np.array(features, dtype=np.float32),
-        np.array(emotion_labels_idx, dtype=np.int64),
-        np.array(intensity_labels, dtype=np.int64),
-        np.array(gender_labels, dtype=np.int64),
+    intensity_labels = df["intensity"].to_numpy(dtype=np.int64)
+    gender_labels = df["gender"].to_numpy(dtype=np.int64)
 
+    print(f"✅ Features shape: {features.shape}")
+    print(f"✅ Example emotions: {emotion_to_idx}")
+
+    return features, emotion_labels, intensity_labels, gender_labels, emotion_to_idx
+
+
+if __name__ == "__main__":
+    features, emotion_labels, intensity_labels, gender_labels, emotion_to_idx = build_dataset(
+        data_dir="data", 
+        output_csv="ravdess_features.csv"
     )
