@@ -23,7 +23,7 @@ def parse_ravdess_filename(filename):
     emotion_id = parts[2]
     intensity_id = parts[3]
     actor_id = int(parts[-1])
-    emotion = EMOTION_MAP.get(emotion_id, "unknown")
+    emotion = emotion_id
     intensity = INTENSITY_MAP.get(intensity_id, "unknown")
     gender = "male" if actor_id % 2 != 0 else "female"
     return emotion, intensity, gender

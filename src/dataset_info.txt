@@ -1,0 +1,22 @@
+=== Emotion Distribution ===
+emotion
+happy        384
+sad          384
+angry        384
+fearful      384
+disgust      384
+surprised    384
+calm         192
+Name: count, dtype: int64
+
+=== Intensity Distribution ===
+intensity
+normal    1536
+strong    1344
+Name: count, dtype: int64
+
+=== Gender Distribution ===
+gender
+male      1440
+female    1440
+Name: count, dtype: int64
