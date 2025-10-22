@@ -4,6 +4,7 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import classification_report, confusion_matrix, accuracy_score
 import seaborn as sns
 import matplotlib.pyplot as plt
+import joblib
 
 # ==============================
 # 1️⃣ Load the dataset
@@ -74,4 +75,8 @@ def train_and_evaluate(df, features, target):
 # ==============================
 models = {}
 for target in target_columns:
-    models[target] = train_and_evaluate(df, feature_columns, target)
+    model = train_and_evaluate(df, feature_columns, target)
+    models[target] = model
+    
+    joblib.dump(model, f'{target}_model.pkl')
+    print(f"Saved model: {target}_model.pkl")
