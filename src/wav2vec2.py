@@ -6,7 +6,7 @@ model_name = "superb/wav2vec2-base-superb-er"  # already fine-tuned for emotion 
 extractor = AutoFeatureExtractor.from_pretrained(model_name)
 model = AutoModelForAudioClassification.from_pretrained(model_name)
 
-speech, sr = librosa.load("happytest.wav", sr=16000)
+speech, sr = librosa.load("Audio/surprisedtest.wav", sr=16000)
 inputs = extractor(speech, sampling_rate=sr, return_tensors="pt")
 
 with torch.no_grad():
