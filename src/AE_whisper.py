@@ -48,3 +48,4 @@ audio_path = "Audio/happytest.wav"
 
 predicted_emotion = predict_emotion(audio_path, model, feature_extractor, id2label)
 print(f"Predicted Emotion: {predicted_emotion}")
+#
