@@ -23,3 +23,5 @@ diarization_result = pipeline(audio_file)
 # Print diarization results: who spoke when
 for turn, _, speaker in diarization_result.itertracks(yield_label=True):
     print(f"Speaker {speaker} speaks from {turn.start:.1f}s to {turn.end:.1f}s")
+
+##hello
