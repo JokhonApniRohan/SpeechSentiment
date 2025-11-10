@@ -1,0 +1,34 @@
+SPEAKER_01: Good morning, Mark.
+SPEAKER_00: Morning, Lisa.
+SPEAKER_00: Did you sleep well?
+SPEAKER_01: Yes, very well.
+SPEAKER_01: What's for breakfast?
+SPEAKER_00: Hmm, maybe eggs and toast?
+SPEAKER_01: Sounds good!
+SPEAKER_01: Do we have juice?
+SPEAKER_00: Yes, orange juice in the fridge.
+SPEAKER_01: Great!
+SPEAKER_01: I'll make coffee too.
+SPEAKER_00: Perfect.
+SPEAKER_00: You'll need energy today.
+SPEAKER_01: Why?
+SPEAKER_01: What's happening today?
+SPEAKER_00: It's a surprise.
+SPEAKER_01: A surprise?
+SPEAKER_01: Tell me.
+SPEAKER_00: Not yet. You'll see soon.
+SPEAKER_01: Come on, tell me a little.
+SPEAKER_00: Just pack your bag, okay?
+SPEAKER_01: Pack my bag.
+SPEAKER_01: Are we going somewhere?
+SPEAKER_00: Yes, but I can't say where.
+SPEAKER_01: Oh no, now I'm curious.
+SPEAKER_00: You'll love it.
+SPEAKER_00: Let's finish breakfast.
+SPEAKER_01: Okay.
+SPEAKER_01: What time do we leave?
+SPEAKER_00: In 10 minutes, the taxi is waiting.
+SPEAKER_01: Already?
+SPEAKER_00: Yes.
+SPEAKER_00: Let's go adventure time.
+SPEAKER_01: Alright, I'm ready!
